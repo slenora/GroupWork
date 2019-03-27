@@ -1,0 +1,11 @@
+Once wget is installed in your computer, 
+
+you will save files as a '.txt'
+
+open up cmd in start menu
+
+and make sure you are in the proper directory (need help? https://www.digitalcitizen.life/command-prompt-how-use-basic-commands)
+
+run this command: wget -r -i FileName.txt --user Username --password Password
+
+then you wait for them to finish downloading
