@@ -14,6 +14,16 @@ t1=datetime(2012,11,01,0,0,0); % This is beginning of files in year, month, day,
 t2=datetime(2012,11,02,1,0,0); % This is end of files in year, month, day, hour, minute, second. Minutes and Seconds are 0 (zero) always
 z=linspace(t1,t2,len); % this is a structure creates a datetime object that corresponds with the YYYY, MM, DD, HH of each file
 
+%Check your z variable, it should look something like this...
+%01-Nov-2012 00:00:00
+%01-Nov-2012 01:00:00
+%01-Nov-2012 02:00:00
+%...
+% there should be no minutes and seconds other than 00:00
+% if you have minutes and seconds, you either have a file missing or
+% duplicated. 
+
+
 z=z'; %This is to flip it
 
 z1 = datevec(z);%This is to convert datetime to a vector containing X number of rows with, year, month, day, hour, minute, second
