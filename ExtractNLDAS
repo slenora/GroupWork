@@ -1,0 +1,70 @@
+%% ~~~~~~~~~~~~ Extract NETCDF from NLDAS files~~~~~~~~~~~~~
+%~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+%~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+files = dir('Z:/GEOGGRADS/siu853664365/GEOG 531/project/*.nc4'); %This is your "mini-directory of all the nc4 files. Make sure you change this appropriately
+
+len = length(files); %how many you have
+
+%run in command window
+%files(1).name (beginning period)
+%files(len).name (end period)
+
+t1=datetime(2012,11,01,0,0,0); % This is beginning of files in year, month, day, hour, minute, second. Minutes and Seconds are 0 (zero) always
+t2=datetime(2012,11,02,1,0,0); % This is end of files in year, month, day, hour, minute, second. Minutes and Seconds are 0 (zero) always
+z=linspace(t1,t2,len); % this is a structure creates a datetime object that corresponds with the YYYY, MM, DD, HH of each file
+
+z=z'; %This is to flip it
+
+z1 = datevec(z);%This is to convert datetime to a vector containing X number of rows with, year, month, day, hour, minute, second
+z1(:,5:6) = []; %this is to delete the columns corresponding with minutes and seconds since our data has only hourly resolution
+
+
+for i = l:length(files)
+    
+    test = files(i).name; %this is the name of the file
+    ncid = netcdf.open(test); %this is to open the file
+    
+    %this to fifure out which value corresponds with your variable. 
+    %You must change the variable where appropriate. To get the exact name of the variable, 
+    %look at the end of any line of your .txt file that you generated from NASA. It is case sensitive! 
+    
+    testID = netcdf.inqVarID(ncid,'VGRD'); 
+    
+    data = netcdf.getVar(ncid,testID); % this is now the part where we extract the exact data
+    
+    data = double(data); % data is originally in single format we are changing to double
+    
+    % you will have to look at data as a test and make sure this is the value that corresponds with NaN Values. 
+    %Otherwise you might replace all your data with NaN!!!
+    data(data >= 1.0e+20) = NaN; 
+    
+    data = data'; %flipping the US!
+    
+    
+     %saving the file as a MATLAB variable, and saving as your variable in
+     %a specific folder
+     %name, then the year, mon, day, hour. an example is
+     %VGRD_2012_11_01_0.mat Each variable should take 216 KB
+     % This will take some time.
+     
+   
+    save(['Z:\GEOGRADS\siu853664365\GEOG 531\project\VGRD_' num2str(z1(i,1)) '_' num2str(z1(i,2)) '_' num2str(z1(i,3)) '_' num2str(z1(i,4)) '.mat'])
+    
+    netcdf.close(ncid);
+    
+    clear test ncid testID data
+end
+
+% This is for later
+% Georef object for all NLDAS data
+% 
+% R = georasterref
+% R.RasterSize = [224 464]
+% R.LatitudeLimits = [25.0625 52.9375]
+% R.LongitudeLimits = [-124.9375 -67.0625]
+% R.ColumnsStartFrom = 'north'
+% R.RowsStartFrom = 'west'
+
+%after you extracted your variable from each file, you should delete the
+%original nc4 files, as they take up unnecessary space.
