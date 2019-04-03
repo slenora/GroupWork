@@ -1,0 +1,45 @@
+%% ~~~~~~~~~~~~ Test Missing NASA Files ~~~~~~~~~~~~~~~~~~~~
+%~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+%~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+files = dir('C:\Users\siu853664365\Downloads\*.nc4'); %This is your "mini-directory of all the nc4 files. Make sure you change this appropriately
+
+len = 45288;%length(files); %how many files ou should have between two dates of your download, including hours (1,887 days x 24 hours)
+
+%run in command window
+%files(1).name (beginning period)
+%files(len).name (end period)
+
+t1=datetime(2012,11,01,0,0,0); % This is beginning of files in year, month, day, hour, minute, second. Minutes and Seconds are 0 (zero) always
+t2=datetime(2017,12,31,23,0,0); % This is end of files in year, month, day, hour, minute, second. Minutes and Seconds are 0 (zero) always
+z=linspace(t1,t2,len); % this is a structure creates a datetime object that corresponds with the YYYY, MM, DD, HH of each file
+
+%Check your z variable, it should look something like this...
+%01-Nov-2012 00:00:00
+%01-Nov-2012 01:00:00
+%01-Nov-2012 02:00:00
+%...
+% there should be no minutes and seconds other than 00:00
+% if you have minutes and seconds, you either have a file missing or
+% duplicated. 
+
+
+z=z'; %This is to flip it
+
+z1 = datevec(z);%This is to convert datetime to a vector containing X number of rows with, year, month, day, hour, minute, second
+z1(:,5:6) = []; %this is to delete the columns corresponding with minutes and seconds since our data has only hourly resolution
+
+table = struct2table(files);
+table(:,2:6) = [];
+
+writetable(table,'TestDates.csv')
+
+%% After you are finished in Excel
+
+%you have to manipulate the data in excel, to get just the year, month,
+%day, and hour by Using text to Columns, option, Fixed Width
+
+dates_N = csvread('TestDates.csv');
+
+[ia, ib] = setdiff(z1, dates_N,'rows'); 
+
