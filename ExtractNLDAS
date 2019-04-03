@@ -11,7 +11,7 @@ len = length(files); %how many you have
 %files(len).name (end period)
 
 t1=datetime(2012,11,01,0,0,0); % This is beginning of files in year, month, day, hour, minute, second. Minutes and Seconds are 0 (zero) always
-t2=datetime(2012,11,02,1,0,0); % This is end of files in year, month, day, hour, minute, second. Minutes and Seconds are 0 (zero) always
+t2=datetime(2017,12,31,23,0,0); % This is end of files in year, month, day, hour, minute, second. Minutes and Seconds are 0 (zero) always
 z=linspace(t1,t2,len); % this is a structure creates a datetime object that corresponds with the YYYY, MM, DD, HH of each file
 
 %Check your z variable, it should look something like this...
