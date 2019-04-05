@@ -1,0 +1,11 @@
+%%Fix Mistake
+
+files1 = dir('C:\Users\siu856020700\Test\*.mat');
+
+for i = 1:5%:length(files)
+    
+    load(files1(i).name)
+    
+    save(['C:\Users\siu856020700\Test\New Tsoil\TSOIL_' num2str(z1(i,1)) '_' num2str(z1(i,2)) '_' num2str(z1(i,3)) '_' num2str(z1(i,4)) '.mat'],'data')
+    
+end
