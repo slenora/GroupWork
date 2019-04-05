@@ -1,0 +1,32 @@
+%% Screen Data
+clear
+clc
+
+files = dir('Z:/Stephania/NLDAS/Test/*.mat'); % change to your directory of matlab variables
+
+stats = NaN(length(files),4); % This is to create the stats 
+
+for i = 1:length(files)
+    tic
+    load(files(i).name)
+    stats(i,1) = i;
+    stats(i,2) = max(max(data));
+    stats(i,3) = min(min(data));
+    stats(i,4) = nanmean(nanmean(data));
+        
+    clear data
+    
+end
+
+figure
+h1 = histfit(stats(:,2),5)
+title('Distribution of Max TSoil')%change Tsoil to your Variable
+
+figure
+h2 = histfit(stats(:,3),5)
+title('Distribution of Min TSoil')% change Tsoil to your Variable 
+
+figure
+h3 = histfit(stats(:,4),5)
+title('Distribution of Mean TSoil')% change Tsoil to your variable
+
