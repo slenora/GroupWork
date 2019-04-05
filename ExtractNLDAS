@@ -59,7 +59,7 @@ for i = l:length(files)
      % This will take some time.
      
    
-    save(['Z:\GEOGRADS\siu853664365\GEOG 531\project\VGRD_' num2str(z1(i,1)) '_' num2str(z1(i,2)) '_' num2str(z1(i,3)) '_' num2str(z1(i,4)) '.mat'])
+    save(['Z:\GEOGRADS\siu853664365\GEOG 531\project\VGRD_' num2str(z1(i,1)) '_' num2str(z1(i,2)) '_' num2str(z1(i,3)) '_' num2str(z1(i,4)) '.mat'],'data')
     
     netcdf.close(ncid);
     
