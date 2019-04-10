@@ -95,7 +95,7 @@ R.RowsStartFrom = 'west'
 
 %% Run
 
-for i= 1:size(data_hy,3)
+for i= 1:size(GOM,3)
     i
     for ii = 1:73
         y = GOM(ii,3,i); % year
