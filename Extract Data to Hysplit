@@ -6,7 +6,7 @@ clc
 
 %download data_hs from GITHUB
 
-load('W:\Stephania\NLDAS\data_hs.mat')
+load('W:\Stephania\NLDAS\data_hy.mat')
 
 % data_hy is
 % By column
