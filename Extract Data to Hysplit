@@ -46,7 +46,94 @@ R = georasterref
 R.RasterSize = [224 464];
 R.LatitudeLimits = [25.0625 52.9375];
 R.LongitudeLimits = [-124.9375 -67.0625];
+R.ColumnsStartFrom = 'north'%% This is to extract hysplit and specific humidity at 2m air
+clear
+clc
+
+% Prepare
+
+%download data_hs from GITHUB
+
+load('W:\Stephania\NLDAS\data_hy.mat')
+
+% data_hy is
+% By column
+% 1. ignore
+% 2. ignore
+% 3. year
+% 4. month
+% 5. day
+% 6. hour
+% 7. ignore
+% 8. ignore
+% 9. hours bwd ignore
+% 10. latitude
+% 11. longitude
+% 12. meters above ground level (mAGL)
+% 13. pressure (hPA)
+
+% 14. SPecific humidity of air at 2m above surface (NLDAS)
+% 15. Temperature of the air at 2m above surface (NLDAS)
+% 16. Temperature of the soil (NLDAS);
+% 17. specific humidity of the soil
+% 18. Volumetric Soil Water Content
+% 19. Wind speed zonal (u)
+% 20. Wind speed meridional (v)
+
+
+data_hy(:,3,:) = data_hy(:,3,:) + 2000; % Hysplit saves the years in yy, add 2000 to convert to yyyy
+data_hy(:,14:20,:) = NaN; 
+
+% This is for later
+% Georef object for all NLDAS data
+% 
+R = georasterref
+R.RasterSize = [224 464];
+R.LatitudeLimits = [25.0625 52.9375];
+R.LongitudeLimits = [-124.9375 -67.0625];
 R.ColumnsStartFrom = 'north'
+R.RowsStartFrom = 'west'
+
+%% Run
+
+for i= 1:size(data_hy,3)
+    i
+    for ii = 1:73
+        y = GOM(ii,3,i); % year
+        m = GOM(ii,4,i); % month
+        d = GOM(ii,5,i); % day
+        h = GOM(ii,6,i); % hour
+        
+        if  y == 2012 |y == 2013 | y == 2014 | y == 2015 | y == 2016 | y == 2017
+            load(['C:\Users\siu854268352\Downloads\DiSPFH\SPFH_' num2str(y) '_' num2str(m) '_' num2str(d) '_' num2str(h) '.mat'])
+            %directory of where your mat files are
+            
+            [row, col] = latlon2pix(R,GOM(ii,10),GOM(ii,11)); %what is the row and column in NLDAS that corresponds to lat and lon in Hysplit Trajectories?
+            row = round(row); % Has to be an integer and not a decimal
+            col = round(col); % Has to be an integer and not a decimal
+
+            test = data(row,col); 
+            GOM(ii,14,i) = test; %change the '14' to the appropriate value for your dataset, see list above
+        else
+            GOM(ii,14,i) = NaN; %change the '14' to the appropriate value for your dataset, see list above
+        end
+        
+        clear y m d h row col test data
+    end
+end
+    
+save('data_hy_DW_qair.mat','data_hy') % Change your initials to yours 'DW' and change your variable to yours 'qair'
+
+
+%%
+
+R = georasterref
+R.RasterSize = [224 464]
+R.LatitudeLimits = [25.0625 52.9375]
+R.LongitudeLimits = [-124.9375 -67.0625]
+R.ColumnsStartFrom = 'north'
+R.RowsStartFrom = 'west'
+
 R.RowsStartFrom = 'west'
 
 %% Run
