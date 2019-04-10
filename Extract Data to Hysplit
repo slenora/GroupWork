@@ -121,7 +121,7 @@ for i= 1:size(GOM,3)
     end
 end
     
-save('data_hy_DW_qair.mat','data_hy') % Change your initials to yours 'DW' and change your variable to yours 'qair'
+save('data_hy_DW_qair.mat','GOM') % Change your initials to yours 'DW' and change your variable to yours 'qair'
 
 
 %%
