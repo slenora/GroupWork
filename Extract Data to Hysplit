@@ -35,9 +35,8 @@ load('W:\Stephania\NLDAS\data_hs.mat')
 % 22. Soil Evaporation (EBS)
 % 23. delta-18-O of soil water at surface (Rsoil)
 
-
-data_hy(:,3,:) = data_hy(:,3,:) + 2000; % Hysplit saves the years in yy, add 2000 to convert to yyyy
-data_hy(:,14:23,:) = NaN; 
+GOM(:,3,:) = GOM(:,3,:) + 2000; % Hysplit saves the years in yy, add 2000 to convert to yyyy
+GOM(:,14:23,:) = NaN; 
 
 % This is for later
 % Georef object for all NLDAS data
