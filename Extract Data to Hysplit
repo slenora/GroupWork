@@ -4,9 +4,9 @@ clc
 
 % Prepare
 
-%download data_hy from GITHUB
+%download data_hy_all from GITHUB
 
-load('W:\Stephania\NLDAS\data_hy.mat')
+load('W:\Stephania\NLDAS\data_hy_all.mat')
 
 % data_hy is
 % By column
@@ -35,8 +35,8 @@ load('W:\Stephania\NLDAS\data_hy.mat')
 % 22. Soil Evaporation (EBS)
 % 23. delta-18-O of soil water at surface (Rsoil)
 
-GOM(:,3,:) = GOM(:,3,:) + 2000; % Hysplit saves the years in yy, add 2000 to convert to yyyy
-GOM(:,14:23,:) = NaN; 
+all(:,3,:) = all(:,3,:) + 2000; % Hysplit saves the years in yy, add 2000 to convert to yyyy
+all(:,14:23,:) = NaN; 
 
 % This is for later
 % Georef object for all NLDAS data
@@ -50,31 +50,31 @@ R.RowsStartFrom = 'west'
 
 %% Run
 
-for i = 1:size(GOM,3)
+for i = 1:size(all,3)
     i
     for ii = 1:73
-        y = GOM(ii,3,i); % year
-        m = GOM(ii,4,i); % month
-        d = GOM(ii,5,i); % day
-        h = GOM(ii,6,i); % hour
+        y = all(ii,3,i); % year
+        m = all(ii,4,i); % month
+        d = all(ii,5,i); % day
+        h = all(ii,6,i); % hour
         
         if  y == 2012 |y == 2013 | y == 2014 | y == 2015 | y == 2016 | y == 2017
             load(['C:\Users\siu854268352\Downloads\DiSPFH\SPFH_' num2str(y) '_' num2str(m) '_' num2str(d) '_' num2str(h) '.mat'])
             %directory of where your mat files are
             
-            [row, col] = latlon2pix(R,GOM(ii,10),GOM(ii,11)); %what is the row and column in NLDAS that corresponds to lat and lon in Hysplit Trajectories?
+            [row, col] = latlon2pix(R,all(ii,10),all(ii,11)); %what is the row and column in NLDAS that corresponds to lat and lon in Hysplit Trajectories?
             row = round(row); % Has to be an integer and not a decimal
             col = round(col); % Has to be an integer and not a decimal
 
             test = data(row,col); 
-            GOM(ii,14,i) = test; %change the '14' to the appropriate value for your dataset, see list above
+            all(ii,14,i) = test; %change the '14' to the appropriate value for your dataset, see list above
         else
-            GOM(ii,14,i) = NaN; %change the '14' to the appropriate value for your dataset, see list above
+            all(ii,14,i) = NaN; %change the '14' to the appropriate value for your dataset, see list above
         end
         
         clear y m d h row col test data
     end
 end
     
-save('data_hy_DW_qair.mat','GOM') % Change your initials to yours 'DW' and change your variable to yours 'qair'
+save('data_hy_DW_qair.mat','all') % Change your initials to yours 'DW' and change your variable to yours 'qair'
     
