@@ -45,7 +45,7 @@ R = georasterref
 R.RasterSize = [224 464];
 R.LatitudeLimits = [25.0625 52.9375];
 R.LongitudeLimits = [-124.9375 -67.0625];
-R.ColumnsStartFrom = 'north'
+R.ColumnsStartFrom = 'south'
 R.RowsStartFrom = 'west'
 
 %% Run
