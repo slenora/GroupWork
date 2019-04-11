@@ -1,0 +1,17 @@
+figure
+clear lat lon
+format long
+lat = data_hy(:,10,3);
+lon = data_hy(:,11,3);
+
+usamap('Conus')
+ax = usamap([10 60],[-140 -65]);
+setm(ax,'MapProjection','mercator');
+land = shaperead('landareas', 'UseGeoCoords', true);
+states = shaperead('usastatelo','UseGeoCoords',true);
+
+a = geoshow(ax,land,'DisplayType','Polygon','FaceColor','None');    
+a = geoshow(ax,states,'DisplayType','Polygon','FaceColor','None');
+
+plotm(lat,lon)
+textm(data_hy(3,10,2),data_hy(3,11,2),'X');
