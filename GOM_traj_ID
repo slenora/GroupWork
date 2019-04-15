@@ -1,0 +1,42 @@
+%% identify GOM events
+
+usamap('Conus')
+ax = usamap([10 38],[-105 -70]);
+setm(ax,'MapProjection','mercator');
+land = shaperead('landareas', 'UseGeoCoords', true);
+states = shaperead('usastatelo','UseGeoCoords',true);
+
+a = geoshow(ax,land,'DisplayType','Polygon','FaceColor','None');    
+a = geoshow(ax,states,'DisplayType','Polygon','FaceColor','None');
+
+%%
+for i = 1:3572
+    
+    lats = data_hy(:,10,i);
+    lons = data_hy(:,11,i);
+    
+     a = (lats >= 10 & lats <= 38);
+     b = (lons >= -105 & lons <= -70);
+     
+     gom = a+b;   
+     
+     c = sum(isnan(gom));
+     
+     d = size(lats,1);
+              
+     e = (d-c);
+     
+     f = sum(gom);
+     
+     g = e*2;
+     
+     h = f/g;
+     
+     gom_all(i,1) = [h];
+     
+     clear lats lons a b gom c d e f g h
+end
+     
+     %%
+     
+     infos = {'gom_all is all the GOM traj that are considered GOM events and r1 is all the rows that are GOM'};
