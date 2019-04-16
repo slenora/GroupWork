@@ -1,10 +1,16 @@
-%% ~~~~~~~~~~~~ Test Missing NASA Files ~~~~~~~~~~~~~~~~~~~~
+%% ~~~~~~~~~~~~ Extract NETCDF from NLDAS files~~~~~~~~~~~~~
 %~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 %~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-files = dir('C:\Users\siu853664365\Downloads\*.nc4'); %This is your "mini-directory of all the nc4 files. Make sure you change this appropriately
+% Downloading data from NASA GES DISC can be frusterating. Here is a code
+% to help figure out what links are missing and that need to be downloaded.
+% Recommend that you use Google Chrome Extension, Simple Mass Downloader.
+% It has the option of downloading link imported from a file. As of now,
+% Firefox's similiar extension does not have that capability
 
-len = 45288;%length(files); %how many files ou should have between two dates of your download, including hours (1,887 days x 24 hours)
+files = dir('Z:\Stephania\NLDAS\Precip\hydro1.gesdisc.eosdis.nasa.gov\daac-bin\OTF\*.nc4'); %This is your "mini-directory of all the nc4 files. Make sure you change this appropriately
+
+len = 45288; %how many files ou should have between two dates of your download, including hours (1,887 days x 24 hours)
 
 %run in command window
 %files(1).name (beginning period)
@@ -29,17 +35,37 @@ z=z'; %This is to flip it
 z1 = datevec(z);%This is to convert datetime to a vector containing X number of rows with, year, month, day, hour, minute, second
 z1(:,5:6) = []; %this is to delete the columns corresponding with minutes and seconds since our data has only hourly resolution
 
-table = struct2table(files);
-table(:,2:6) = [];
+table1 = struct2table(files);
+table1(:,2:6) = [];
 
-writetable(table,'TestDates.csv')
+writetable(table1,'TestDates.csv')
 
-%% After you are finished in Excel
+%% Which files are missing?
 
 %you have to manipulate the data in excel, to get just the year, month,
-%day, and hour by Using text to Columns, option, Fixed Width
+%day, and hour, using text to columns and fixed width
 
 dates_N = csvread('TestDates.csv');
 
-[ia, ib] = setdiff(z1, dates_N,'rows'); 
+[ia, ib] = setdiff(z1, dates_N,'rows');
 
+[C, ic, id] = intersect(z1,dates_N,'rows');
+
+%% Create txt file for missing data
+
+%open precip_1.txt using importdata tool. This is the full txt file
+%cntaining the subset data that your ordered for your whole time period.
+%This should not be changed. After you import it as a table, save it as a
+%matlab variable that you will upload multiple times.
+
+load('precip1.mat') % the original table containing the links you loaded
+
+precip1(ic,:) = []; % this gets rid of all the links that are the same as the ones you already have downloaded. 
+
+writetable(precip1,'missingData.txt') % this is the new file containing missing URL links
+
+
+
+%% Test Duplicates
+
+files2 = dir('Z:\Stephania\NLDAS\Precip\hydro1.gesdisc.eosdis.nasa.gov\daac-bin\OTF\*(1).nc4');
