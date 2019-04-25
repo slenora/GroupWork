@@ -2,7 +2,9 @@
 
 
 
-load('Z:\Stephania\NLDAS\Variables\ALL_GOM_events') 
+load('X:\Stephania\NLDAS\Variables\ALL_GOM_events') 
+
+d_Reg = NaN(159,15);
 
 % This the trajectories after two filters have been applied. 
 % The first filter was making sure these trajectories were witin GOM Box
@@ -84,6 +86,18 @@ load('Z:\Stephania\NLDAS\Variables\ALL_GOM_events')
 % 2. 1 day before
 % 3. 2 days before
 
+%% Dexcess Values
+% 
+% r1 = find(d(:,7) >= 20);
+% d_high = d(r1,:);
+% 
+% ALL_d = ALL_GOM_events(:,:,r1);
+% RE_d = RE_GOM(:,:,r1);
+% SWI_d = SWI(:,:,r1);
+% Pre_d = Prec(:,:,r1);
+
+
+
 %% Manual Class.
 
 % This code will generate 6 graphs. The first graph will show the specific
@@ -113,7 +127,7 @@ load('Z:\Stephania\NLDAS\Variables\ALL_GOM_events')
 
 
 
-n=1;
+n=2;
 data = ALL_GOM_events(:,:,n); %subset
 q = data(:,14); %specific humidity
 j = q >= nanmean(q); % The values that are above the mean
@@ -130,6 +144,7 @@ x = 1:73;
 bb = linspace(0,0,73); % For the line in soil moisture anamoly. 
 
 figure
+title(['Run no' num2str(n)])
 subplot(4,1,1)
 plot(x,q)
 xlim([1 73])
@@ -163,39 +178,12 @@ plot(x,RE_dry);
 xlim([1 73])
 title('Dry Soil RE')
 
-%%
 
-d_Reg = NaN(159,15);
-d_Reg(:,1:9) = d;
-
-% What is D reg
-
-% 1. Year
-% 2. Month
-% 3. Day
-% 4. Hour
-% 5. GOM event?
-% 6. ENSO index
-% 7. d-excess  value
-% 8. Day of Year
-% 9. corresponds with either 00:00 or 12:00
-% 10. RE Value ****************** Add here >>>>> d_Red(n,10);
-% 11. Rair
-% 12. Rsoil
-% 13. SST
-% 14. EBS
-% 15. Winds(u + v)
-% 16. 
-% 17.
-% 18.
-
-%% For Mapping purposes
-\
 figure
 clear lat lon
 format long
-lat = ALL_d(:,10,n);
-lon = ALL_d(:,11,n);
+lat = data(:,10);
+lon = data(:,11);
 
 usamap('Conus')
 ax = usamap([10 60],[-140 -65]);
@@ -207,7 +195,5 @@ a = geoshow(ax,land,'DisplayType','Polygon','FaceColor','None');
 a = geoshow(ax,states,'DisplayType','Polygon','FaceColor','None');
 
 plotm(lat,lon)
-textm(ALL_d(12,10,n),ALL_d(12,11,n),'X');
-
-
-
+textm(data(10,10),data(10,11),'X');
+textm(data(20,10),data(20,11),'X');
