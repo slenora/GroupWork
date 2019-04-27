@@ -1,0 +1,190 @@
+load('Z:\Stephania\NLDAS\Variables\ALL_1_events.mat') 
+load('Z:\Stephania\NLDAS\Variables\NONGOM.mat') 
+
+ALL_d1 = ALL_d(:,:,ib);
+d1_1 = d1(ib,:);
+Prec_d1 = Prec_all(:,:,ib);
+RE_d1 = RE_all(:,:,ib);
+SWI_d1 = SWI_all(:,:,ib);
+
+
+
+% This the trajectories after two filters have been applied. 
+% The first filter was making sure these trajectories were witin GOM Box
+%(lats >= 10 & lats <= 38); % Lat confinememt boundary
+%(lons >= -105 & lons <= -70); % Lon confinement boundary
+% The second filter was whether the dates corresponding with the first
+% (1,:,:) date and hour of each trajectory coincided with a precipitation
+% event in Carbondale
+
+% ALL_GOM_events is
+% By column
+% 1. ignore
+% 2. ignore
+% 3. year
+% 4. month
+% 5. day
+% 6. hour
+% 7. ignore
+% 8. ignore
+% 9. hours bwd ignore
+% 10. latitude
+% 11. longitude
+% 12. meters above ground level (mAGL)
+% 13. pressure (hPA)
+
+
+% 14. SPecific humidity of air at 2m above surface (NLDAS) 
+% 15. Temperature of the air at 2m above surface (NLDAS)
+% 16. Temperature of the soil (NLDAS);
+% 17. specific humidity of the soil
+% 18. Volumetric Soil Water Content (theta)
+% 19. Wind speed zonal (u)
+% 20. Wind speed meridional (v)
+% 21. Precipitation (p)
+% 22. Soil Evaporation (EBS)
+% 23. delta-18-O of soil water at surface (Rsoil)
+% 24. Day of Year
+% 25. delta-18-O of Air (Rair) monthly average
+% 26. sea surface temperatures (SST)
+% 27. Dew Point Temp 
+
+%This is the RE of either wet or dry soil
+% RE by column
+
+% 1. Relative Humidity of Air
+% 2. Relative Humidity Soil
+% 3. ALPHA_eq1 eq with SST (K)
+% 4. ALPHA_eq2 with air temperature (K)
+%Wet Soil
+% 5. RE with SST alpha and alpha_K1 
+% 6. RE with Tair alpha and alpha_K1
+% 7. RE with SST alpha and alpha_K2
+% 8. RE with Tair alpha and alpha_k2
+%Dry Soil
+% 9. RE with SST alpha and alpha_K1
+% 10. RE with Tair alpha and alpha_K1
+% 11. RE with SST alpha and alpha_K2
+% 12. RE with Tair alpha and alpha_k2
+
+% What is d?
+
+% d is precipitation events in Carbondale
+% 1. Year
+% 2. Month
+% 3. Day
+% 4. Hour
+% 5. GOM event?
+% 6. ENSO index
+% 7. d-excess  value
+% 8. Day of Year
+% 9. corresponds with either 00:00 or 12:00
+
+
+% SWI by column
+% 1. Volumetric Soil Content Anomaly (use this one);
+
+% Prec is precipitation for trajectories
+% 1. on day of
+% 2. 1 day before
+% 3. 2 days before
+
+%% Manual Class.
+
+% This code will generate 6 graphs. The first graph will show the specific
+% humidity data for that nth trajectory in a blue line. The orange line
+% specifies values of q that are above the mean (our threshold for moisture
+% uptake). Values that start at the left the graph are Carbondale and then
+% follows the trajectory backwards towards teh Gulf of Mexico (GOM). The
+% objective is to follow the orange line, and see exactly where it goes to
+% 0. 
+
+% The next graph is precipitation amount for three days, (the day of, 1 and
+% 2 days before). This is to help support whether your soil is wet or dry.
+
+% The next graph is soil moisture anomaly. The orange line signifies 0.
+% Negative values indicate Drier than normal soils and negative values
+% indicate wetter than normal soil. This is to determine whether the soil
+% is wet or if it is dry.
+
+% The EBS is the calculated parameter from NLDAS. Specirfically it is the
+% bare soil evaporation value. This is also helpful in determining where,
+% along with q, there might have been terrestrial evaporation. 
+
+% The next two graphs show the RE wet and the RE dry. 
+
+% Coupling q, and j(values above the mean of q), and ebs, this will
+% determine the exact cell address that we want to use RE from. 
+
+ n=2;
+ data = ALL_d1(:,:,n); %subset
+ q = data(:,14); %specific humidity
+ j = q >= nanmean(q); % The values that are above the mean
+ p = Prec_d1(:,:,n); % Precip
+ s = SWI_d1(:,:,n); % This is the soil moisture anomaly 
+ e = data(:,22); % EBS or Evaporation from bare soil
+ RE_wet = RE_d1(:,8,n); % subset at 1st event on wet soil sondition
+ RE_wet(RE_wet > 50) = NaN;
+ RE_wet(RE_wet < -50) = NaN;
+ RE_dry = RE_d1(:,12,n); % subset at 1st event on wet soil sondition
+ RE_dry(RE_dry > 50) = NaN;
+ RE_dry(RE_dry < -50) = NaN;
+ x = 1:73;
+ bb = linspace(0,0,73); % For the line in soil moisture anamoly. 
+ 
+ figure
+title(['Run no' num2str(n)])
+subplot(4,1,1)
+plot(x,q)
+xlim([1 73])
+yyaxis right
+plot(x,j)
+ylim([-2 2]) 
+title('Specific Humidity')
+subplot(4,1,2)
+plot(x,p(:,1),x,p(:,2),x,p(:,3))
+xlim([1 73])
+title('Precipitation')
+subplot(4,1,3)
+plot(x,s)
+xlim([1 73])
+hold on
+plot(x,bb)
+title('Soil Moisture Anomaly')
+subplot(4,1,4)
+plot(x,e)
+title('EBS')
+xlim([1 73])
+
+figure
+subplot(2,1,1)
+plot(x,RE_wet)%,x,data(:,23),x,data(:,25))
+xlim([1 73])
+title('Wet Soil RE')
+%legend('RE', 'Rsoil','Rair')
+subplot(2,1,2)
+plot(x,RE_dry);
+xlim([1 73])
+title('Dry Soil RE')
+
+
+figure
+clear lat lon
+format long
+lat = data(:,10);
+lon = data(:,11);
+
+usamap('Conus')
+ax = usamap([10 60],[-140 -65]);
+setm(ax,'MapProjection','mercator');
+land = shaperead('landareas', 'UseGeoCoords', true);
+states = shaperead('usastatelo','UseGeoCoords',true);
+
+a = geoshow(ax,land,'DisplayType','Polygon','FaceColor','None');    
+a = geoshow(ax,states,'DisplayType','Polygon','FaceColor','None');
+
+plotm(lat,lon)
+textm(data(10,10),data(10,11),'X');
+textm(data(20,10),data(20,11),'X');
+
+
