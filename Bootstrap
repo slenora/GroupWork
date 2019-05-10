@@ -1,0 +1,1133 @@
+%% Bootstrap Method
+
+% Taking the average along the trajectory
+
+% ALL_d is
+% By column
+% 1. ignore
+% 2. ignore
+% 3. year
+% 4. month
+% 5. day
+% 6. hour
+% 7. ignore
+% 8. ignore
+% 9. hours bwd ignore
+% 10. latitude
+% 11. longitude
+% 12. meters above ground level (mAGL)
+% 13. pressure (hPA)
+
+
+% 14. SPecific humidity of air at 2m above surface (NLDAS) 
+% 15. Temperature of the air at 2m above surface (NLDAS)
+% 16. Temperature of the soil (NLDAS);
+% 17. specific humidity of the soil
+% 18. Volumetric Soil Water Content (theta)
+% 19. Wind speed zonal (u)
+% 20. Wind speed meridional (v)
+% 21. Precipitation (p)
+% 22. Soil Evaporation (EBS)
+% 23. delta-18-O of soil water at surface (Rsoil)
+% 24. Day of Year
+% 25. delta-18-O of Air (Rair) monthly average
+% 26. sea surface temperatures (SST)
+% 27. Dew Point Temp 
+
+
+%% Model 1 - d-excess  All events
+for i = 1:331
+    subset(i,1) = d1(i,7);                  %this is d
+    subset(i,2) = nanmean(ALL_d(:,26,i));   %this is SST
+    subset(i,3) = ALL_d(1,15,i);            %this is temp of site
+    subset(i,4) = nanmean(ALL_d(:,25,i));    %this 18O of ocean
+end
+
+clear i
+
+
+%r = a + (b-a).*rand(N,1)."
+
+for i = 1:1000
+    i
+    e = size(subset,1);
+    ee = e/2;
+    ee = round(ee);
+   
+    rows = round(1 + (331-1).*rand(331,1));
+    
+    rows1 = rows(1:ee);
+    rows2 = rows(ee+1:e);
+    
+    X = [ones(size(rows1)) subset(rows1,2) subset(rows1,3) subset(rows1,4)];
+    y1 = subset(rows1,1);
+    y2 = subset(rows2,1);
+    
+    [b, int, r] = regress(y1,X);
+   
+    YFIT = b(1) + b(2).*subset(rows2,2) + b(3).*subset(rows2,3) + b(4).*subset(rows2,4);
+    stats1(i,1) = corr(y2,YFIT,'rows','pairwise');                       % This is corr
+    stats1(i,2) = sqrt(nanmean((y2-YFIT).^2));                           % This is RMSE
+    stats1(i,3) = 1 - (nansum((y2 - YFIT).^2)/nansum((y2 - nanmean(y2)).^2));  % This is Nash-Sutcliffe efficiency (NSE)
+    stats1(i,4) = (1/size(y2,1))*nansum(abs(y2 - YFIT));
+
+
+    clear e ee rows rows1 rows2 X y1 y2 b int r YFIT
+    
+end
+
+
+%%  Model 2 d-excess  All events
+clear subset
+
+for i = 1:331
+    subset(i,1) = d1(i,7);                  %this is d
+    subset(i,2) = nanmean(ALL_d(:,26,i));   %this is SST
+    subset(i,3) = nanmean(ALL_d(:,25,i));    %this 18O of ocean
+end
+
+clear i
+
+for i = 1:1000
+    i
+    e = size(subset,1);
+    ee = e/2;
+    ee = round(ee);
+   
+    rows = round(1 + (331-1).*rand(331,1));
+    
+    rows1 = rows(1:ee);
+    rows2 = rows(ee+1:e);
+    
+    X = [ones(size(rows1)) subset(rows1,2) subset(rows1,3)];
+    y1 = subset(rows1,1);
+    y2 = subset(rows2,1);
+    
+    [b, int, r] = regress(y1,X);
+   
+    YFIT = b(1) + b(2).*subset(rows2,2) + b(3).*subset(rows2,3);
+    stats2(i,1) = corr(y2,YFIT,'rows','pairwise');                       % This is corr
+    stats2(i,2) = sqrt(nanmean((y2-YFIT).^2));                           % This is RMSE
+    stats2(i,3) = 1 - (nansum((y2 - YFIT).^2)/nansum((y2 - nanmean(y2)).^2));  % This is Nash-Sutcliffe efficiency (NSE)
+    stats2(i,4) = (1/size(y2,1))*nansum(abs(y2 - YFIT));
+
+
+    clear e ee rows rows1 rows2 X y1 y2 b int r YFIT
+    
+end
+
+%% Model 3 d-excess   All events
+clear subset
+
+for i = 1:331
+    subset(i,1) = d1(i,7);                  %this is d
+    subset(i,2) = nanmean(ALL_d(:,16,i));   %this is Tsoil
+    subset(i,3) = nanmean(ALL_d(:,15,i));   %this Tair
+    subset(i,4) = nanmean(ALL_d(:,17,i));   %this is qsoil
+    subset(i,5) = nanmean(ALL_d(:,14,i));   %this is qair
+    subset(i,6) = nanmean(ALL_d(:,26,i));   %this is SST
+    subset(i,7) = nanmean(ALL_d(:,25,i));   %this is Rair
+    subset(i,8) = nanmean(ALL_d(:,18,i));   %this is theta
+    subset(i,9) = nanmean(ALL_d(:,22,i));   %this is EBS
+end
+    
+
+clear i
+
+for i = 1:1000
+    i
+    e = size(subset,1);
+    ee = e/2;
+    ee = round(ee);
+   
+    rows = round(1 + (331-1).*rand(331,1));
+    
+    rows1 = rows(1:ee);
+    rows2 = rows(ee+1:e);
+    
+    X = [ones(size(rows1)) subset(rows1,2) subset(rows1,3) subset(rows1,4) subset(rows1,5) subset(rows1,6) subset(rows1,7) subset(rows1,8) subset(rows1,9)];
+    y1 = subset(rows1,1);
+    y2 = subset(rows2,1);
+    
+    [b, int, r] = regress(y1,X);
+   
+    YFIT = b(1) + b(2).*subset(rows2,2) + b(3).*subset(rows2,3) + b(4).*subset(rows2,4) + b(5).*subset(rows2,5) + b(6).*subset(rows2,6) + b(7).*subset(rows2,7) + b(8).*subset(rows2,8) + b(9).*subset(rows2,9);
+    stats3(i,1) = corr(y2,YFIT,'rows','pairwise');                       % This is corr
+    stats3(i,2) = sqrt(nanmean((y2-YFIT).^2));                           % This is RMSE
+    stats3(i,3) = 1 - (nansum((y2 - YFIT).^2)/nansum((y2 - nanmean(y2)).^2));  % This is Nash-Sutcliffe efficiency (NSE)
+    stats3(i,4) = (1/size(y2,1))*nansum(abs(y2 - YFIT));
+
+
+    clear e ee rows rows1 rows2 X y1 y2 b int r YFIT
+    
+end
+
+%% Model 4 d-excess  All events
+
+clear subset
+
+for i = 1:331
+    subset(i,1) = d1(i,7);                  %this is d
+    subset(i,2) = nanmean(ALL_d(:,15,i));   %this Tair
+    subset(i,3) = nanmean(ALL_d(:,14,i));   %this is qair
+    subset(i,4) = nanmean(ALL_d(:,26,i));   %this is SST
+    subset(i,5) = nanmean(ALL_d(:,18,i));   %this is theta
+    subset(i,6) = nanmean(ALL_d(:,22,i));   %this is EBS
+end
+    
+
+clear i
+
+for i = 1:1000
+    i
+    e = size(subset,1);
+    ee = e/2;
+    ee = round(ee);
+   
+    rows = round(1 + (331-1).*rand(331,1));
+    
+    rows1 = rows(1:ee);
+    rows2 = rows(ee+1:e);
+    
+    X = [ones(size(rows1)) subset(rows1,2) subset(rows1,3) subset(rows1,4) subset(rows1,5) subset(rows1,6)];
+    y1 = subset(rows1,1);
+    y2 = subset(rows2,1);
+    
+    [b, int, r] = regress(y1,X);
+   
+    YFIT = b(1) + b(2).*subset(rows2,2) + b(3).*subset(rows2,3) + b(4).*subset(rows2,4) + b(5).*subset(rows2,5) + b(6).*subset(rows2,6);
+    stats4(i,1) = corr(y2,YFIT,'rows','pairwise');                       % This is corr
+    stats4(i,2) = sqrt(nanmean((y2-YFIT).^2));                           % This is RMSE
+    stats4(i,3) = 1 - (nansum((y2 - YFIT).^2)/nansum((y2 - nanmean(y2)).^2));  % This is Nash-Sutcliffe efficiency (NSE)
+    stats4(i,4) = (1/size(y2,1))*nansum(abs(y2 - YFIT));
+
+
+    clear e ee rows rows1 rows2 X y1 y2 b int r YFIT
+    
+end
+
+%% Model 1 - d-excess  GOM events
+clear subset
+
+for i = 1:159
+    subset(i,1) = d(i,7);                               %this is d
+    subset(i,2) = nanmean(ALL_GOM_events(:,26,i));      %this is SST
+    subset(i,3) = ALL_GOM_events(1,15,i);               %this is temp of site
+    subset(i,4) = nanmean(ALL_GOM_events(:,25,i));      %this 18O of ocean
+end
+
+clear i
+
+
+%r = a + (b-a).*rand(N,1)."
+
+for i = 1:1000
+    i
+    e = size(subset,1);
+    ee = e/2;
+    ee = round(ee);
+   
+    rows = round(1 + (159-1).*rand(159,1));
+    
+    rows1 = rows(1:ee);
+    rows2 = rows(ee+1:e);
+    
+    X = [ones(size(rows1)) subset(rows1,2) subset(rows1,3) subset(rows1,4)];
+    y1 = subset(rows1,1);
+    y2 = subset(rows2,1);
+    
+    [b, int, r] = regress(y1,X);
+   
+    YFIT = b(1) + b(2).*subset(rows2,2) + b(3).*subset(rows2,3) + b(4).*subset(rows2,4);
+    stats5(i,1) = corr(y2,YFIT,'rows','pairwise');                       % This is corr
+    stats5(i,2) = sqrt(nanmean((y2-YFIT).^2));                           % This is RMSE
+    stats5(i,3) = 1 - (nansum((y2 - YFIT).^2)/nansum((y2 - nanmean(y2)).^2));  % This is Nash-Sutcliffe efficiency (NSE)
+    stats5(i,4) = (1/size(y2,1))*nansum(abs(y2 - YFIT));
+
+
+    clear e ee rows rows1 rows2 X y1 y2 b int r YFIT
+    
+end
+
+%%  Model 2 d-excess  GOM events
+clear subset
+
+
+for i = 1:159
+    
+    subset(i,1) = d(i,7);                               %this is d
+    subset(i,2) = nanmean(ALL_GOM_events(:,26,i));      %this is SST
+    subset(i,3) = nanmean(ALL_GOM_events(:,25,i));      %this 18O of ocean
+end
+
+clear i
+
+for i = 1:1000
+    i
+    e = size(subset,1);
+    ee = e/2;
+    ee = round(ee);
+   
+    rows = round(1 + (159-1).*rand(159,1));
+    
+    rows1 = rows(1:ee);
+    rows2 = rows(ee+1:e);
+    
+    X = [ones(size(rows1)) subset(rows1,2) subset(rows1,3)];
+    y1 = subset(rows1,1);
+    y2 = subset(rows2,1);
+    
+    [b, int, r] = regress(y1,X);
+   
+    YFIT = b(1) + b(2).*subset(rows2,2) + b(3).*subset(rows2,3);
+    stats6(i,1) = corr(y2,YFIT,'rows','pairwise');                              % This is corr
+    stats6(i,2) = sqrt(nanmean((y2-YFIT).^2));                                  % This is RMSE
+    stats6(i,3) = 1 - (nansum((y2 - YFIT).^2)/nansum((y2 - nanmean(y2)).^2));   % This is Nash-Sutcliffe efficiency (NSE)
+    stats6(i,4) = (1/size(y2,1))*nansum(abs(y2 - YFIT));
+
+
+    clear e ee rows rows1 rows2 X y1 y2 b int r YFIT
+    
+end
+
+%% Model 3 d-excess   GOM events
+clear subset
+
+
+for i = 1:159
+   
+    subset(i,1) = d1(i,7);                           %this is d
+    subset(i,2) = nanmean(ALL_GOM_events(:,16,i));   %this is Tsoil
+    subset(i,3) = nanmean(ALL_GOM_events(:,15,i));   %this Tair
+    subset(i,4) = nanmean(ALL_GOM_events(:,17,i));   %this is qsoil
+    subset(i,5) = nanmean(ALL_GOM_events(:,14,i));   %this is qair
+    subset(i,6) = nanmean(ALL_GOM_events(:,26,i));   %this is SST
+    subset(i,7) = nanmean(ALL_GOM_events(:,25,i));   %this is Rair
+    subset(i,8) = nanmean(ALL_GOM_events(:,18,i));   %this is theta
+    subset(i,9) = nanmean(ALL_GOM_events(:,22,i));   %this is EBS
+end
+    
+
+clear i
+
+for i = 1:1000
+    i
+    e = size(subset,1);
+    ee = e/2;
+    ee = round(ee);
+   
+    rows = round(1 + (159-1).*rand(159,1));
+    
+    rows1 = rows(1:ee);
+    rows2 = rows(ee+1:e);
+    
+    X = [ones(size(rows1)) subset(rows1,2) subset(rows1,3) subset(rows1,4) subset(rows1,5) subset(rows1,6) subset(rows1,7) subset(rows1,8) subset(rows1,9)];
+    y1 = subset(rows1,1);
+    y2 = subset(rows2,1);
+    
+    [b, int, r] = regress(y1,X);
+   
+    YFIT = b(1) + b(2).*subset(rows2,2) + b(3).*subset(rows2,3) + b(4).*subset(rows2,4) + b(5).*subset(rows2,5) + b(6).*subset(rows2,6) + b(7).*subset(rows2,7) + b(8).*subset(rows2,8) + b(9).*subset(rows2,9);
+    stats7(i,1) = corr(y2,YFIT,'rows','pairwise');                       % This is corr
+    stats7(i,2) = sqrt(nanmean((y2-YFIT).^2));                           % This is RMSE
+    stats7(i,3) = 1 - (nansum((y2 - YFIT).^2)/nansum((y2 - nanmean(y2)).^2));  % This is Nash-Sutcliffe efficiency (NSE)
+    stats7(i,4) = (1/size(y2,1))*nansum(abs(y2 - YFIT));
+
+
+    clear e ee rows rows1 rows2 X y1 y2 b int r YFIT
+    
+end
+
+%% Model 4 d-excess  GOM events
+
+clear subset
+
+
+for i = 1:159
+   
+    subset(i,1) = d1(i,7);                           %this is d
+    subset(i,2) = nanmean(ALL_GOM_events(:,15,i));   %this Tair
+    subset(i,3) = nanmean(ALL_GOM_events(:,14,i));   %this is qair
+    subset(i,4) = nanmean(ALL_GOM_events(:,26,i));   %this is SST
+    subset(i,5) = nanmean(ALL_GOM_events(:,18,i));   %this is theta
+    subset(i,6) = nanmean(ALL_GOM_events(:,22,i));   %this is EBS
+end
+    
+
+clear i
+
+for i = 1:1000
+    i
+    e = size(subset,1);
+    ee = e/2;
+    ee = round(ee);
+   
+    rows = round(1 + (159-1).*rand(159,1));
+    
+    rows1 = rows(1:ee);
+    rows2 = rows(ee+1:e);
+    
+    X = [ones(size(rows1)) subset(rows1,2) subset(rows1,3) subset(rows1,4) subset(rows1,5) subset(rows1,6)];
+    y1 = subset(rows1,1);
+    y2 = subset(rows2,1);
+    
+    [b, int, r] = regress(y1,X);
+   
+    YFIT = b(1) + b(2).*subset(rows2,2) + b(3).*subset(rows2,3) + b(4).*subset(rows2,4) + b(5).*subset(rows2,5) + b(6).*subset(rows2,6);
+    stats8(i,1) = corr(y2,YFIT,'rows','pairwise');                       % This is corr
+    stats8(i,2) = sqrt(nanmean((y2-YFIT).^2));                           % This is RMSE
+    stats8(i,3) = 1 - (nansum((y2 - YFIT).^2)/nansum((y2 - nanmean(y2)).^2));  % This is Nash-Sutcliffe efficiency (NSE)
+    stats8(i,4) = (1/size(y2,1))*nansum(abs(y2 - YFIT));                %Mean abs error (MAE)
+
+
+    clear e ee rows rows1 rows2 X y1 y2 b int r YFIT
+    
+end
+%% Plotting
+figure
+title('d-excess All events')
+
+subplot(4,4,1)
+h1 = histfit(stats1(:,1))
+h1(1).FaceColor = [0.5 1 0.8];
+h1(2).Color = [0 0 0];
+xlim([-1 1]);
+ylim([0 100]);
+xlabel('R^{2}')
+text(-0.75,80,'Model 1')
+
+subplot(4,4,2)
+h2 = histfit(stats1(:,2))
+h2(1).FaceColor = [0.5 1 0.8];
+h2(2).Color = [0 0 0];
+xlim([0 20]);
+ylim([0 100]);
+xlabel('RMSE')
+
+subplot(4,4,3)
+h3 = histfit(stats1(:,3))
+h3(1).FaceColor = [0.5 1 0.8];
+h3(2).Color = [0 0 0];
+xlim([0 1]);
+ylim([0 100]);
+xlabel('NSE')
+
+subplot(4,4,4)
+h4 = histfit(stats1(:,4))
+h4(1).FaceColor = [0.5 1 0.8];
+h4(2).Color = [0 0 0];
+xlim([0 10]);
+ylim([0 100]);
+xlabel('MAE')
+
+subplot(4,4,5)
+h5 = histfit(stats2(:,1))
+h5(1).FaceColor = [0.5 1 0.8];
+h5(2).Color = [0 0 0];
+xlim([-1 1]);
+ylim([0 100]);
+xlabel('R^{2}')
+text(-0.75,80,'Model 2')
+
+subplot(4,4,6)
+h6 = histfit(stats2(:,2))
+h6(1).FaceColor = [0.5 1 0.8];
+h6(2).Color = [0 0 0];
+xlim([0 20]);
+ylim([0 100]);
+xlabel('RMSE')
+
+subplot(4,4,7)
+h7 = histfit(stats2(:,3))
+h7(1).FaceColor = [0.5 1 0.8];
+h7(2).Color = [0 0 0];
+xlim([0 1]);
+ylim([0 100]);
+xlabel('NSE')
+
+subplot(4,4,8)
+h8 = histfit(stats2(:,4))
+h8(1).FaceColor = [0.5 1 0.8];
+h8(2).Color = [0 0 0];
+xlim([0 10]);
+ylim([0 100]);
+xlabel('MAE')
+
+subplot(4,4,9)
+h9 = histfit(stats3(:,1))
+h9(1).FaceColor = [0.5 1 0.8];
+h9(2).Color = [0 0 0];
+xlim([-1 1]);
+ylim([0 100]);
+xlabel('R^{2}')
+text(-0.75,80,'Model 3')
+
+subplot(4,4,10)
+h10 = histfit(stats3(:,2))
+h10(1).FaceColor = [0.5 1 0.8];
+h10(2).Color = [0 0 0];
+xlim([0 20]);
+ylim([0 100]);
+xlabel('RMSE')
+
+subplot(4,4,11)
+h11 = histfit(stats3(:,3))
+h11(1).FaceColor = [0.5 1 0.8];
+h11(2).Color = [0 0 0];
+xlim([0 1]);
+ylim([0 100]);
+xlabel('NSE')
+
+subplot(4,4,12)
+h12 = histfit(stats3(:,4))
+h12(1).FaceColor = [0.5 1 0.8];
+h12(2).Color = [0 0 0];
+xlim([0 10]);
+ylim([0 100]);
+xlabel('MAE')
+
+subplot(4,4,13)
+h13 = histfit(stats4(:,1))
+h13(1).FaceColor = [0.5 1 0.8];
+h13(2).Color = [0 0 0];
+xlim([-1 1]);
+ylim([0 100]);
+xlabel('R^{2}')
+text(-0.75,80,'Model 4')
+
+subplot(4,4,14)
+h14 = histfit(stats4(:,2))
+h14(1).FaceColor = [0.5 1 0.8];
+h14(2).Color = [0 0 0];
+xlim([0 20]);
+ylim([0 100]);
+xlabel('RMSE')
+
+subplot(4,4,15)
+h15 = histfit(stats4(:,3))
+h15(1).FaceColor = [0.5 1 0.8];
+h15(2).Color = [0 0 0];
+xlim([0 1]);
+ylim([0 100]);
+xlabel('NSE')
+
+subplot(4,4,16)
+h16 = histfit(stats4(:,4))
+h16(1).FaceColor = [0.5 1 0.8];
+h16(2).Color = [0 0 0];
+xlim([0 10]);
+ylim([0 100]);
+xlabel('MAE')
+
+%%
+figure
+
+subplot(4,4,1)
+h1 = histfit(stats5(:,1))
+h1(1).FaceColor = [0.5 1 0.8];
+h1(2).Color = [0 0 0];
+xlim([-1 1]);
+ylim([0 100]);
+xlabel('R^{2}')
+text(-0.75,80,'Model 1')
+
+subplot(4,4,2)
+h2 = histfit(stats5(:,2))
+h2(1).FaceColor = [0.5 1 0.8];
+h2(2).Color = [0 0 0];
+xlim([0 20]);
+ylim([0 150]);
+xlabel('RMSE')
+
+subplot(4,4,3)
+h3 = histfit(stats5(:,3))
+h3(1).FaceColor = [0.5 1 0.8];
+h3(2).Color = [0 0 0];
+xlim([-1 1]);
+ylim([0 150]);
+xlabel('NSE')
+
+subplot(4,4,4)
+h4 = histfit(stats5(:,4))
+h4(1).FaceColor = [0.5 1 0.8];
+h4(2).Color = [0 0 0];
+xlim([0 10]);
+ylim([0 100]);
+xlabel('MAE')
+
+subplot(4,4,5)
+h5 = histfit(stats6(:,1))
+h5(1).FaceColor = [0.5 1 0.8];
+h5(2).Color = [0 0 0];
+xlim([-1 1]);
+ylim([0 100]);
+xlabel('R^{2}')
+text(-0.75,80,'Model 2')
+
+subplot(4,4,6)
+h6 = histfit(stats6(:,2))
+h6(1).FaceColor = [0.5 1 0.8];
+h6(2).Color = [0 0 0];
+xlim([0 20]);
+ylim([0 150]);
+xlabel('RMSE')
+
+subplot(4,4,7)
+h7 = histfit(stats6(:,3))
+h7(1).FaceColor = [0.5 1 0.8];
+h7(2).Color = [0 0 0];
+xlim([-1 1]);
+ylim([0 150]);
+xlabel('NSE')
+
+subplot(4,4,8)
+h8 = histfit(stats6(:,4))
+h8(1).FaceColor = [0.5 1 0.8];
+h8(2).Color = [0 0 0];
+xlim([0 10]);
+ylim([0 100]);
+xlabel('MAE')
+
+subplot(4,4,9)
+h9 = histfit(stats7(:,1))
+h9(1).FaceColor = [0.5 1 0.8];
+h9(2).Color = [0 0 0];
+xlim([-1 1]);
+ylim([0 100]);
+xlabel('R^{2}')
+text(-0.75,80,'Model 3')
+
+subplot(4,4,10)
+h10 = histfit(stats7(:,2))
+h10(1).FaceColor = [0.5 1 0.8];
+h10(2).Color = [0 0 0];
+xlim([0 20]);
+ylim([0 150]);
+xlabel('RMSE')
+
+subplot(4,4,11)
+h11 = histfit(stats7(:,3))
+h11(1).FaceColor = [0.5 1 0.8];
+h11(2).Color = [0 0 0];
+xlim([-1 1]);
+ylim([0 150]);
+xlabel('NSE')
+
+subplot(4,4,12)
+h12 = histfit(stats7(:,4))
+h12(1).FaceColor = [0.5 1 0.8];
+h12(2).Color = [0 0 0];
+xlim([0 10]);
+ylim([0 100]);
+xlabel('MAE')
+
+subplot(4,4,13)
+h13 = histfit(stats8(:,1))
+h13(1).FaceColor = [0.5 1 0.8];
+h13(2).Color = [0 0 0];
+xlim([-1 1]);
+ylim([0 100]);
+xlabel('R^{2}')
+text(-0.75,80,'Model 4')
+
+subplot(4,4,14)
+h14 = histfit(stats8(:,2))
+h14(1).FaceColor = [0.5 1 0.8];
+h14(2).Color = [0 0 0];
+xlim([0 20]);
+ylim([0 150]);
+xlabel('RMSE')
+
+subplot(4,4,15)
+h15 = histfit(stats8(:,3))
+h15(1).FaceColor = [0.5 1 0.8];
+h15(2).Color = [0 0 0];
+xlim([-1 1]);
+ylim([0 150]);
+xlabel('NSE')
+
+subplot(4,4,16)
+h16 = histfit(stats8(:,4))
+h16(1).FaceColor = [0.5 1 0.8];
+h16(2).Color = [0 0 0];
+xlim([0 10]);
+ylim([0 100]);
+xlabel('MAE')
+%% Model 1 - d18O  GOM events
+clear subset
+for i = 1:159
+    
+    subset(i,1) = b(i,1);                               %this is d18O
+    subset(i,2) = nanmean(ALL_GOM_events(:,26,i));      %this is SST
+    subset(i,3) = ALL_GOM_events(1,15,i);               %this is temp of site
+    subset(i,4) = nanmean(ALL_GOM_events(:,25,i));      %this 18O of ocean
+end
+
+clear i
+
+
+%r = a + (b-a).*rand(N,1)."
+
+for i = 1:1000
+    i
+    e = size(subset,1);
+    ee = e/2;
+    ee = round(ee);
+   
+    rows = round(1 + (159-1).*rand(159,1));
+    
+    rows1 = rows(1:ee);
+    rows2 = rows(ee+1:e);
+    
+    X = [ones(size(rows1)) subset(rows1,2) subset(rows1,3) subset(rows1,4)];
+    y1 = subset(rows1,1);
+    y2 = subset(rows2,1);
+    
+    [bb, int, r] = regress(y1,X);
+   
+    YFIT = bb(1) + bb(2).*subset(rows2,2) + bb(3).*subset(rows2,3) + bb(4).*subset(rows2,4);
+    stats9(i,1) = corr(y2,YFIT,'rows','pairwise');                       % This is corr
+    stats9(i,2) = sqrt(nanmean((y2-YFIT).^2));                           % This is RMSE
+    stats9(i,3) = 1 - (nansum((y2 - YFIT).^2)/nansum((y2 - nanmean(y2)).^2));  % This is Nash-Sutcliffe efficiency (NSE)
+    stats9(i,4) = (1/size(y2,1))*nansum(abs(y2 - YFIT));
+
+
+    clear e ee rows rows1 rows2 X y1 y2 bb int r YFIT
+    
+end
+
+%%  Model 2 d18O GOM events
+
+
+for i = 1:159
+    
+    subset(i,1) = b(i,1);                               %this is d18O
+    subset(i,2) = nanmean(ALL_GOM_events(:,26,i));      %this is SST
+    subset(i,3) = nanmean(ALL_GOM_events(:,25,i));      %this 18O of ocean
+end
+
+clear i
+
+for i = 1:1000
+    i
+    e = size(subset,1);
+    ee = e/2;
+    ee = round(ee);
+   
+    rows = round(1 + (159-1).*rand(159,1));
+    
+    rows1 = rows(1:ee);
+    rows2 = rows(ee+1:e);
+    
+    X = [ones(size(rows1)) subset(rows1,2) subset(rows1,3)];
+    y1 = subset(rows1,1);
+    y2 = subset(rows2,1);
+    
+    [bb, int, r] = regress(y1,X);
+   
+    YFIT = bb(1) + bb(2).*subset(rows2,2) + bb(3).*subset(rows2,3);
+    stats10(i,1) = corr(y2,YFIT,'rows','pairwise');                              % This is corr
+    stats10(i,2) = sqrt(nanmean((y2-YFIT).^2));                                  % This is RMSE
+    stats10(i,3) = 1 - (nansum((y2 - YFIT).^2)/nansum((y2 - nanmean(y2)).^2));   % This is Nash-Sutcliffe efficiency (NSE)
+    stats10(i,4) = (1/size(y2,1))*nansum(abs(y2 - YFIT));
+
+
+    clear e ee rows rows1 rows2 X y1 y2 bb int r YFIT
+    
+end
+
+%% Model 3 d18O   GOM events
+clear subset
+
+
+for i = 1:159
+   
+    subset(i,1) = b(i,1);                           %this is d180
+    subset(i,2) = nanmean(ALL_GOM_events(:,16,i));   %this is Tsoil
+    subset(i,3) = nanmean(ALL_GOM_events(:,15,i));   %this Tair
+    subset(i,4) = nanmean(ALL_GOM_events(:,17,i));   %this is qsoil
+    subset(i,5) = nanmean(ALL_GOM_events(:,14,i));   %this is qair
+    subset(i,6) = nanmean(ALL_GOM_events(:,26,i));   %this is SST
+    subset(i,7) = nanmean(ALL_GOM_events(:,25,i));   %this is Rair
+    subset(i,8) = nanmean(ALL_GOM_events(:,18,i));   %this is theta
+    subset(i,9) = nanmean(ALL_GOM_events(:,22,i));   %this is EBS
+end
+    
+
+clear i
+
+for i = 1:1000
+    i
+    e = size(subset,1);
+    ee = e/2;
+    ee = round(ee);
+   
+    rows = round(1 + (159-1).*rand(159,1));
+    
+    rows1 = rows(1:ee);
+    rows2 = rows(ee+1:e);
+    
+    X = [ones(size(rows1)) subset(rows1,2) subset(rows1,3) subset(rows1,4) subset(rows1,5) subset(rows1,6) subset(rows1,7) subset(rows1,8) subset(rows1,9)];
+    y1 = subset(rows1,1);
+    y2 = subset(rows2,1);
+    
+    [bb, int, r] = regress(y1,X);
+   
+    YFIT = bb(1) + bb(2).*subset(rows2,2) + bb(3).*subset(rows2,3) + bb(4).*subset(rows2,4) + bb(5).*subset(rows2,5) + bb(6).*subset(rows2,6) + bb(7).*subset(rows2,7) + bb(8).*subset(rows2,8) + bb(9).*subset(rows2,9);
+    stats11(i,1) = corr(y2,YFIT,'rows','pairwise');                       % This is corr
+    stats11(i,2) = sqrt(nanmean((y2-YFIT).^2));                           % This is RMSE
+    stats11(i,3) = 1 - (nansum((y2 - YFIT).^2)/nansum((y2 - nanmean(y2)).^2));  % This is Nash-Sutcliffe efficiency (NSE)
+    stats11(i,4) = (1/size(y2,1))*nansum(abs(y2 - YFIT));
+
+
+    clear e ee rows rows1 rows2 X y1 y2 bb int r YFIT
+    
+end
+
+%% Model 4 d18O  GOM events
+
+clear subset
+
+
+for i = 1:159
+   
+    subset(i,1) = b(i,1);                           %this is d18O
+    subset(i,2) = nanmean(ALL_GOM_events(:,15,i));   %this Tair
+    subset(i,3) = nanmean(ALL_GOM_events(:,14,i));   %this is qair
+    subset(i,4) = nanmean(ALL_GOM_events(:,26,i));   %this is SST
+    subset(i,5) = nanmean(ALL_GOM_events(:,18,i));   %this is theta
+    subset(i,6) = nanmean(ALL_GOM_events(:,22,i));   %this is EBS
+end
+    
+
+clear i
+
+for i = 1:1000
+    i
+    e = size(subset,1);
+    ee = e/2;
+    ee = round(ee);
+   
+    rows = round(1 + (159-1).*rand(159,1));
+    
+    rows1 = rows(1:ee);
+    rows2 = rows(ee+1:e);
+    
+    X = [ones(size(rows1)) subset(rows1,2) subset(rows1,3) subset(rows1,4) subset(rows1,5) subset(rows1,6)];
+    y1 = subset(rows1,1);
+    y2 = subset(rows2,1);
+    
+    [bb, int, r] = regress(y1,X);
+   
+    YFIT = bb(1) + bb(2).*subset(rows2,2) + bb(3).*subset(rows2,3) + bb(4).*subset(rows2,4) + bb(5).*subset(rows2,5) + bb(6).*subset(rows2,6);
+    stats12(i,1) = corr(y2,YFIT,'rows','pairwise');                       % This is corr
+    stats12(i,2) = sqrt(nanmean((y2-YFIT).^2));                           % This is RMSE
+    stats12(i,3) = 1 - (nansum((y2 - YFIT).^2)/nansum((y2 - nanmean(y2)).^2));  % This is Nash-Sutcliffe efficiency (NSE)
+    stats12(i,4) = (1/size(y2,1))*nansum(abs(y2 - YFIT));                %Mean abs error (MAE)
+
+
+    clear e ee rows rows1 rows2 X y1 y2 bb int r YFIT
+    
+end
+
+%%
+figure
+
+subplot(4,4,1)
+h1 = histfit(stats9(:,1))
+h1(1).FaceColor = [0.5 1 0.8];
+h1(2).Color = [0 0 0];
+xlim([-1 1]);
+ylim([0 100]);
+xlabel('R^{2}')
+text(-0.75,80,'Model 1')
+
+subplot(4,4,2)
+h2 = histfit(stats9(:,2))
+h2(1).FaceColor = [0.5 1 0.8];
+h2(2).Color = [0 0 0];
+xlim([0 5]);
+ylim([0 150]);
+xlabel('RMSE')
+
+subplot(4,4,3)
+h3 = histfit(stats9(:,3))
+h3(1).FaceColor = [0.5 1 0.8];
+h3(2).Color = [0 0 0];
+xlim([-1 1]);
+ylim([0 200]);
+xlabel('NSE')
+
+subplot(4,4,4)
+h4 = histfit(stats9(:,4))
+h4(1).FaceColor = [0.5 1 0.8];
+h4(2).Color = [0 0 0];
+xlim([0 3]);
+ylim([0 100]);
+xlabel('MAE')
+
+subplot(4,4,5)
+h5 = histfit(stats10(:,1))
+h5(1).FaceColor = [0.5 1 0.8];
+h5(2).Color = [0 0 0];
+xlim([-1 1]);
+ylim([0 100]);
+xlabel('R^{2}')
+text(-0.75,80,'Model 2')
+
+subplot(4,4,6)
+h6 = histfit(stats10(:,2))
+h6(1).FaceColor = [0.5 1 0.8];
+h6(2).Color = [0 0 0];
+xlim([0 5]);
+ylim([0 150]);
+xlabel('RMSE')
+
+subplot(4,4,7)
+h7 = histfit(stats10(:,3))
+h7(1).FaceColor = [0.5 1 0.8];
+h7(2).Color = [0 0 0];
+xlim([-1 1]);
+ylim([0 200]);
+xlabel('NSE')
+
+subplot(4,4,8)
+h8 = histfit(stats10(:,4))
+h8(1).FaceColor = [0.5 1 0.8];
+h8(2).Color = [0 0 0];
+xlim([0 3]);
+ylim([0 100]);
+xlabel('MAE')
+
+subplot(4,4,9)
+h9 = histfit(stats11(:,1))
+h9(1).FaceColor = [0.5 1 0.8];
+h9(2).Color = [0 0 0];
+xlim([-1 1]);
+ylim([0 100]);
+xlabel('R^{2}')
+text(-0.75,80,'Model 3')
+
+subplot(4,4,10)
+h10 = histfit(stats11(:,2))
+h10(1).FaceColor = [0.5 1 0.8];
+h10(2).Color = [0 0 0];
+xlim([0 5]);
+ylim([0 150]);
+xlabel('RMSE')
+
+subplot(4,4,11)
+h11 = histfit(stats11(:,3))
+h11(1).FaceColor = [0.5 1 0.8];
+h11(2).Color = [0 0 0];
+xlim([-1 1]);
+ylim([0 200]);
+xlabel('NSE')
+
+subplot(4,4,12)
+h12 = histfit(stats11(:,4))
+h12(1).FaceColor = [0.5 1 0.8];
+h12(2).Color = [0 0 0];
+xlim([0 3]);
+ylim([0 100]);
+xlabel('MAE')
+
+subplot(4,4,13)
+h13 = histfit(stats12(:,1))
+h13(1).FaceColor = [0.5 1 0.8];
+h13(2).Color = [0 0 0];
+xlim([-1 1]);
+ylim([0 100]);
+xlabel('R^{2}')
+text(-0.75,80,'Model 4')
+
+subplot(4,4,14)
+h14 = histfit(stats12(:,2))
+h14(1).FaceColor = [0.5 1 0.8];
+h14(2).Color = [0 0 0];
+xlim([0 5]);
+ylim([0 150]);
+xlabel('RMSE')
+
+subplot(4,4,15)
+h15 = histfit(stats12(:,3))
+h15(1).FaceColor = [0.5 1 0.8];
+h15(2).Color = [0 0 0];
+xlim([-1 1]);
+ylim([0 200]);
+xlabel('NSE')
+
+subplot(4,4,16)
+h16 = histfit(stats12(:,4))
+h16(1).FaceColor = [0.5 1 0.8];
+h16(2).Color = [0 0 0];
+xlim([0 3]);
+ylim([0 100]);
+xlabel('MAE')
+%% Model 3 d-excess over 20 ALL events
+
+r1 = find(d1(d1(:,7) >=20));
+
+
+clear subset
+
+for i = 1:size(r1)
+    rr = r1(i);
+    subset(i,1) = d1(rr,7);                  %this is d
+    subset(i,2) = nanmean(ALL_d(:,16,rr));   %this is Tsoil
+    subset(i,3) = nanmean(ALL_d(:,15,rr));   %this Tair
+    subset(i,4) = nanmean(ALL_d(:,17,rr));   %this is qsoil
+    subset(i,5) = nanmean(ALL_d(:,14,rr));   %this is qair
+    subset(i,6) = nanmean(ALL_d(:,26,rr));   %this is SST
+    subset(i,7) = nanmean(ALL_d(:,25,rr));   %this is Rair
+    subset(i,8) = nanmean(ALL_d(:,18,rr));   %this is theta
+    subset(i,9) = nanmean(ALL_d(:,22,rr));   %this is EBS
+end
+    
+
+clear i
+
+for i = 1:1000
+    i
+    e = size(subset,1);
+    ee = e/2;
+    ee = round(ee);
+   
+    rows = round(1 + (101-1).*rand(101,1));
+    
+    rows1 = rows(1:ee);
+    rows2 = rows(ee+1:e);
+    
+    X = [ones(size(rows1)) subset(rows1,2) subset(rows1,3) subset(rows1,4) subset(rows1,5) subset(rows1,6) subset(rows1,7) subset(rows1,8) subset(rows1,9)];
+    y1 = subset(rows1,1);
+    y2 = subset(rows2,1);
+    
+    [b, int, r] = regress(y1,X);
+   
+    YFIT = b(1) + b(2).*subset(rows2,2) + b(3).*subset(rows2,3) + b(4).*subset(rows2,4) + b(5).*subset(rows2,5) + b(6).*subset(rows2,6) + b(7).*subset(rows2,7) + b(8).*subset(rows2,8) + b(9).*subset(rows2,9);
+    stats13(i,1) = corr(y2,YFIT,'rows','pairwise');                       % This is corr
+    stats13(i,2) = sqrt(nanmean((y2-YFIT).^2));                           % This is RMSE
+    stats13(i,3) = 1 - (nansum((y2 - YFIT).^2)/nansum((y2 - nanmean(y2)).^2));  % This is Nash-Sutcliffe efficiency (NSE)
+    stats13(i,4) = (1/size(y2,1))*nansum(abs(y2 - YFIT));
+
+
+    clear e ee rows rows1 rows2 X y1 y2 b int r YFIT
+    
+end
+
+%% Model 4 d-excess  All events
+
+clear subset
+
+for i = 1:size(r1)
+    rr = r1(i);
+    subset(i,1) = d1(rr,7);                  %this is d
+    subset(i,2) = nanmean(ALL_d(:,15,rr));   %this Tair
+    subset(i,3) = nanmean(ALL_d(:,14,rr));   %this is qair
+    subset(i,4) = nanmean(ALL_d(:,26,rr));   %this is SST
+    subset(i,5) = nanmean(ALL_d(:,18,rr));   %this is theta
+    subset(i,6) = nanmean(ALL_d(:,22,rr));   %this is EBS
+end
+    
+
+clear i
+
+for i = 1:1000
+    i
+    e = size(subset,1);
+    ee = e/2;
+    ee = round(ee);
+   
+    rows = round(1 + (101-1).*rand(101,1));
+    
+    rows1 = rows(1:ee);
+    rows2 = rows(ee+1:e);
+    
+    X = [ones(size(rows1)) subset(rows1,2) subset(rows1,3) subset(rows1,4) subset(rows1,5) subset(rows1,6)];
+    y1 = subset(rows1,1);
+    y2 = subset(rows2,1);
+    
+    [b, int, r] = regress(y1,X);
+   
+    YFIT = b(1) + b(2).*subset(rows2,2) + b(3).*subset(rows2,3) + b(4).*subset(rows2,4) + b(5).*subset(rows2,5) + b(6).*subset(rows2,6);
+    stats14(i,1) = corr(y2,YFIT,'rows','pairwise');                       % This is corr
+    stats14(i,2) = sqrt(nanmean((y2-YFIT).^2));                           % This is RMSE
+    stats14(i,3) = 1 - (nansum((y2 - YFIT).^2)/nansum((y2 - nanmean(y2)).^2));  % This is Nash-Sutcliffe efficiency (NSE)
+    stats14(i,4) = (1/size(y2,1))*nansum(abs(y2 - YFIT));
+
+
+    clear e ee rows rows1 rows2 X y1 y2 b int r YFIT
+    
+end
+
+%%
+
+figure
+
+subplot(2,4,1)
+h1 = histfit(stats13(:,1))
+h1(1).FaceColor = [0.5 1 0.8];
+h1(2).Color = [0 0 0];
+xlim([-1 1]);
+ylim([0 100]);
+xlabel('R^{2}')
+text(-0.75,80,'Model 3')
+
+subplot(2,4,2)
+h2 = histfit(stats13(:,2))
+h2(1).FaceColor = [0.5 1 0.8];
+h2(2).Color = [0 0 0];
+xlim([0 50]);
+ylim([0 500]);
+xlabel('RMSE')
+
+subplot(2,4,3)
+h3 = histfit(stats13(:,3))
+h3(1).FaceColor = [0.5 1 0.8];
+h3(2).Color = [0 0 0];
+xlim([-10 1]);
+ylim([0 1000]);
+xlabel('NSE')
+
+subplot(2,4,4)
+h4 = histfit(stats13(:,4))
+h4(1).FaceColor = [0.5 1 0.8];
+h4(2).Color = [0 0 0];
+xlim([-10 10]);
+ylim([0 400]);
+xlabel('MAE')
+
+subplot(2,4,5)
+h5 = histfit(stats14(:,1))
+h5(1).FaceColor = [0.5 1 0.8];
+h5(2).Color = [0 0 0];
+xlim([-1 1]);
+ylim([0 100]);
+xlabel('R^{2}')
+text(-0.75,80,'Model 4')
+
+subplot(2,4,6)
+h6 = histfit(stats14(:,2))
+h6(1).FaceColor = [0.5 1 0.8];
+h6(2).Color = [0 0 0];
+xlim([0 50]);
+ylim([0 500]);
+xlabel('RMSE')
+
+subplot(2,4,7)
+h7 = histfit(stats14(:,3))
+h7(1).FaceColor = [0.5 1 0.8];
+h7(2).Color = [0 0 0];
+xlim([-10 1]);
+ylim([0 1000]);
+xlabel('NSE')
+
+subplot(2,4,8)
+h8 = histfit(stats14(:,4))
+h8(1).FaceColor = [0.5 1 0.8];
+h8(2).Color = [0 0 0];
+xlim([-10 10]);
+ylim([0 400]);
+xlabel('MAE')
+
+
